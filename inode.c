@@ -1,123 +1,58 @@
-/* Filesystem ideas from Python program rewritten in C
+/* Inode functions outlined in inode.c
  *
- * I K Stead, 23-09-2012
+ * I K Stead, 25-09-2012
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "inode.h"
 
-const int FSIZE = 1000;
-const int MAXFILES = 1000;
-const int START_INDEX = 0;
-const int MAX_CMD_LEN = 128;
 
-const int MYDIR = 1;
-const int MYFILE = 2;
-
-typedef struct inode_struct {  /* Contains all file data except for name */
-    int id;
-    int type;
-    time_t last_mod;
-    char data[FSIZE];
-} Inode;
-
-typedef struct inode_table {   /* Indexes all inodes. */
-    int next_free_index;
-    Inode *table[MAXFILES];
-} Table;
-
-/* Return pointer to a new inode table. */
-Table *table_init()    
+Inode *inode_alloc()
 {
-    Table *new_t = malloc(sizeof(Table));
-    new_t-> next_free_index = START_INDEX;
-
-    return new_t;
-}
-
-/* Allocate memory for a new inode and add its pointer to the table. */
-void table_alloc_inode(Table *table)
-{
-    int i = table->next_free_index;
-    table-> next_free_index++;
     Inode *node = malloc(sizeof(Inode));
-    table-> table[i] = node;
+    return node;
 }
 
-/* Return inode pointer at given index in table. 
- * TODO: better error checking 
- */
-Inode *table_get_inode(Table *table, int index)
+void inode_clear(Inode *node)
 {
-    if (index < table-> next_free_index) 
-        return table-> table[index];
+    node = NULL;
+}
+
+void inode_free(Inode *node)
+{
+    free(node);
+}
+
+void inode_setid(Inode *node, int id)
+{
+    node-> id = id;
+}
+
+void inode_settype(Inode *node, char type)
+{
+    if (type != 'd' && type != 'f')
+        printf("[inode_settype] invalid filetype: %c\n", type);
     else 
-        return NULL;
+        node-> type = type;
+    return;
 }
 
-/* Print table to stdout for debugging purposes. */
-void table_print(Table *table)
+void inode_append(Inode *node, char string[])
 {
-    int i;
-    for (i = 0; i < table-> next_free_index; i++) {
-        Inode *inode = table-> table[i];
-        if (inode != NULL) { /* i.e. node at index hasn't been deleted */
-            printf("Inode at index %i:\n  Data: %s\n", i, inode-> data);
-        }
-    }
+    char *data = node-> data;
+    if (strlen(string) > sizeof(data))
+        printf("[inode_append] data too long: %s\n", string);
+    else
+        strcat(data, string);
+    return;
 }
 
-/* Deallocate inode at given address. */
-void table_del_inode(Table *table, int index)
+void inode_print(Inode *node)
 {
-    Inode *inode = table-> table[index];
-    /* If we freed this pointer, table_rinse would give double free error. */
-    inode = NULL;
-}
-
-/* Destroy all inodes, then destroy table */
-void table_rinse(Table *table)
-{
-    int i;
-    for (i = 0; i < table-> next_free_index; i++) {
-        free(table-> table[i]);
-    }
-    free(table);
-}
-
-/* Copy a string to the data field of given inode. This will overwrite
- * any data that was in there already...
- */
-void inode_set_data(Table *table, int index, char string[])
-{
-    if (strlen(string) < FSIZE) {
-        Inode *inode = table-> table[index];
-        strcpy(inode-> data, string);
-    }
-}
-
-
-int main()
-{
-    Table *table = table_init();
-    
-    /* Command interpreter */
-    char input[MAX_CMD_LEN];
-    while (strcmp(input, "quit") != 0) {
-        gets(input);
-        if (strcmp(input, "make") == 0) {
-            table_alloc_inode(table);
-        } else if (strcmp(input, "show") == 0) {
-            table_print(table);
-        } else if (strcmp(input, "test") == 0) {
-            table_del_inode(table, 0);
-        } else if (strcmp(input, "set") == 0) {
-            inode_set_data(table, 1, "tessst");
-        }
-    }
-
-    /* Clean up */
-    table_rinse(table);
-
-    return EXIT_SUCCESS;
+    int id = node ->id;
+    char t = node ->type;
+    char *s = node ->data;
+    printf("Contents of inode %i:\n  %c\n  '%s'\n", id, t, s);
+    return;
 }
