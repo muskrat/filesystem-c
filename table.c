@@ -12,7 +12,7 @@ Table *table_new()
     return malloc(sizeof(Table));
 }
 
-int table_new_inode(Table *table, char t)
+Inode *table_new_inode(Table *table, char t)
 {
     int i = table->next_free_index;
     table->next_free_index ++;
@@ -22,7 +22,7 @@ int table_new_inode(Table *table, char t)
     inode_settype(node, t);
 
     table->table[i] = node;
-    return i;
+    return node;
 }
 
 void table_clear_inode(Table *table, int index)

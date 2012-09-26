@@ -41,7 +41,7 @@ void inode_settype(Inode *node, char type)
 void inode_append(Inode *node, char string[])
 {
     char *data = node-> data;
-    if (strlen(string) > sizeof(data))
+    if (strlen(string) > FSIZE)
         printf("[inode_append] data too long: %s\n", string);
     else
         strcat(data, string);
@@ -55,4 +55,26 @@ void inode_print(Inode *node)
     char *s = node ->data;
     printf("Contents of inode %i:\n  %c\n  '%s'\n", id, t, s);
     return;
+}
+
+/* Functions which act on on directories */
+
+void inode_dir_formatentry(char *entry, int index, char fname[])
+{
+    if (strlen(fname) > NAME_LEN)
+        printf("[inode_dir_formatentry] filename %s too long\n", fname);
+    else 
+        sprintf(entry, "%s%c%i%c", fname, DATA_SEP, index, ENTRY_SEP);
+}
+
+void inode_dir_addentry(Inode *dnode, int index, char fname[])
+{
+    int id = dnode->id;
+    if (dnode->type != DIR_T)
+        printf("[inode_dir_addentry] inode %i not directory\n", id);
+    else {
+        char entry[NAME_LEN];
+        inode_dir_formatentry(entry, index, fname);
+        inode_append(dnode, entry);
+    }
 }

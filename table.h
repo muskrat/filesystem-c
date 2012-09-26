@@ -3,7 +3,6 @@
  *
  * I K Stead
  *
- * TODO: Need some way of reallocating freed inode indices
  */
 #include "inode.h"
 
@@ -20,8 +19,8 @@ typedef struct table_struct {
 /* Return pointer to new table */
 Table *table_new();
 
-/* Create a new inode at next free index. Returns index of new inode */
-int table_new_inode(Table *table, char t);
+/* Create a new inode at next free index. Returns pointer to new inode */
+Inode *table_new_inode(Table *table, char t);
 
 /* Clear inode at given index */
 void table_clear_inode(Table *table, int index);

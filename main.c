@@ -9,9 +9,25 @@
 
 #define MAX_CMD_LEN 32
 
+/* Functions called by commands in the interpreter */
+
+/* Create a new file or dir file in given directory. Used in move,
+ * mkdir, new
+ */
+void newfile(Table *table, Inode *w_dir, char type, char fname[])
+{
+    Inode *node = table_new_inode(table, type); /* Allocate a new inode */
+    int index = node->id;                         /* Get its index */
+    inode_dir_addentry(w_dir, index, fname);
+    return;
+}
+
 int main()
 {
+    /* Create a root directory and point working directory to it */
     Table *table = table_new();
+    Inode *root = table_new_inode(table, DIR_T);
+    Inode *w_dir = root;
 
     /* Command interpreter */
     char input[MAX_CMD_LEN]; /* Input buffer */
@@ -20,12 +36,17 @@ int main()
     {
         printf("> "); /* Prompt */
         gets(input);
-        if (!strcmp(input, "make")) {
-            /* Temporary assignment so I have some output to look at */
-            int i = table_new_inode(table, 'f');
+        if (!strcmp(input, "new")) {
+            printf("Enter filename: ");
+            gets(input);
+            newfile(table, w_dir, FILE_T, input);
         }
-        else if (!strcmp(input, "showall"))
+        else if (!strcmp(input, "showall")) {
             table_print_all(table);
+        }
+        else {
+            printf("Invalid command.\n");
+        }
     }
 
     /* Clean up */

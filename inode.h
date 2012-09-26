@@ -3,9 +3,13 @@
  * 
  * I K Stead, 25-09-2012
  */
-#define FILE_T  'f'
-#define DIR_T  'd'
-#define FSIZE   1024  /* Maximum byte length of file */
+#define FILE_T      'f'
+#define DIR_T       'd'
+#define FSIZE       1024    /* Maximum byte length of file */
+#define NAME_LEN    32      /* Maximum length of file names */
+
+#define DATA_SEP    ':'     /* Defines the foramt for directory entries */
+#define ENTRY_SEP   '\n'
 
 typedef struct inode_struct {
     int id;             /* Corresponds with index in table */
@@ -35,5 +39,11 @@ void inode_append(Inode *node, char string[]);
 
 /* Print contents of inode to stdout */
 void inode_print(Inode *node);
+
+/* Given inode index and filename, return a properly formatted dir entry */
+void inode_dir_formatentry(char *entry, int index, char fname[]);
+
+/* Add a directory entry to given inode, if it is a directory */
+void inode_dir_addentry(Inode *dnode, int index, char fname[]);
 
 
