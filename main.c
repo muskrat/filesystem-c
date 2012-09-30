@@ -44,6 +44,10 @@ int main()
         else if (!strcmp(input, "showall")) {
             table_print_all(table);
         }
+        else if (!strcmp(input, "node")) {
+            int n = inode_dir_seek(w_dir, "crips");
+            printf("%i\n", n);
+        }
         else {
             printf("Invalid command.\n");
         }
